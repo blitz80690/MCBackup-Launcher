@@ -1,7 +1,5 @@
 ﻿Imports System.IO
 Imports System.Net
-Imports Microsoft.WindowsAPICodePack
-Imports Microsoft.WindowsAPICodePack.Taskbar
 
 Public Class Main
     Dim WebClient As System.Net.WebClient = New System.Net.WebClient
@@ -72,22 +70,28 @@ Public Class Main
     End Sub
 
     Private Sub StartDownload()
-        AddHandler WebClient.DownloadProgressChanged, AddressOf OnDownloadProgressChanged
-        AddHandler WebClient.DownloadFileCompleted, AddressOf OnFileDownloadCompleted
-        StreamWriter.WriteLine(LogTimeStamp() & "[INFO] Downloading http://content.nicoco007.com/downloads/mcbackup/" + LatestVersion + "/mcbackup.exe...")
-        WebClient.DownloadFileAsync(New Uri("http://content.nicoco007.com/downloads/mcbackup/" + LatestVersion + "/mcbackup.exe"), AppData + "\.mcbackup\mcbackup.exe")
+        Try
+            AddHandler WebClient.DownloadProgressChanged, AddressOf OnDownloadProgressChanged
+            AddHandler WebClient.DownloadFileCompleted, AddressOf OnFileDownloadCompleted
+            StreamWriter.WriteLine(LogTimeStamp() & "[INFO] Downloading http://content.nicoco007.com/downloads/mcbackup/" + LatestVersion + "/mcbackup.exe...")
+            WebClient.DownloadFileAsync(New Uri("http://content.nicoco007.com/downloads/mcbackup/" + LatestVersion + "/mcbackup.exe"), AppData + "\.mcbackup\mcbackup.exe")
+        Catch ex As Exception
+            StreamWriter.WriteLine(LogTimeStamp() & "[SEVERE] " & ex.Message)
+        End Try
     End Sub
 
     Private Sub OnDownloadProgressChanged(ByVal sender As Object, ByVal e As System.Net.DownloadProgressChangedEventArgs)
-        Dim TotalSize As Long = e.TotalBytesToReceive
-        Dim DownloadedBytes As Long = e.BytesReceived
-        Dim Percentage As Integer = e.ProgressPercentage
+        Try
+            Dim TotalSize As Long = e.TotalBytesToReceive
+            Dim DownloadedBytes As Long = e.BytesReceived
+            Dim Percentage As Integer = e.ProgressPercentage
 
-        UpdateProgressBarStyle(ProgressBarStyle.Blocks)
-        UpdateProgressBarValue(Percentage)
-        TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal)
-        TaskbarManager.Instance.SetProgressValue(Percentage, 100)
-        UpdateLabel("Downloading... " + Percentage.ToString + "%")
+            UpdateProgressBarStyle(ProgressBarStyle.Blocks)
+            UpdateProgressBarValue(Percentage)
+            UpdateLabel("Downloading... " + Percentage.ToString + "%")
+        Catch ex As Exception
+            StreamWriter.WriteLine(LogTimeStamp() & "[SEVERE] " & ex.Message)
+        End Try
     End Sub
     Private Sub OnFileDownloadCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs)
         If Not e.Error Is Nothing Then
